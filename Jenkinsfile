@@ -5,6 +5,7 @@ pipeline {
         registryCredentials = "dockerhub"
         repositoryCredentials = "github"
         project = "m17-e2"
+        projectVersion = "1.0"
         repository = "https://github.com/mikiligero/eoi-m17.git"
     }
     stages {
@@ -19,6 +20,22 @@ pipeline {
                     git branch: 'main',
                         credentialsId: repositoryCredentials,
                         url: repository
+                }
+            }
+        }
+        stage('Code Analysis'){
+            environment{
+                scannerHome= tool 'Sonar'
+            }
+            steps{
+                script{
+                    withSonarQubeEnv('Sonar'){
+                        sh "${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=$project \
+                        -Dsonar.projectName=$project \
+                        -Dsonar.projectVersion=$projectVersion \
+                        -Dsonar.sources=./"
+                    }
                 }
             }
         }
